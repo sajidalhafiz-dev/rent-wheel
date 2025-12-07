@@ -5,6 +5,7 @@ import { userRoutes } from "./modules/user/user.routes";
 import { authRoutes } from "./modules/auth/auth.routes";
 import cors from "cors";
 import { vehicleRoutes } from "./modules/vehicle/vehicle.routes";
+import { bookingRoutes } from "./modules/booking/booking.routes";
 
 const app = express();
 // parser
@@ -20,10 +21,8 @@ initDB();
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/vehicles", vehicleRoutes);
-// app.use("/api/v1/bookings", bookingRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
 
-// -- Request to other routes -> 404 -- //
-// ... rest of your code
 
 app.use((req, res) => {
   res.status(404).json({
