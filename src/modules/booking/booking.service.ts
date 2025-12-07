@@ -8,14 +8,14 @@ const createBooking = async (
 ) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
-  // Customer can only create booking for themselves
+  
   if (user.role === "customer" && user.id !== customer_id!.toString()) {
     throw new Error(
       "Forbidden: Customers can only create bookings for their own account"
     );
   }
 
-  // Check vehicle availability
+  
   const vehicleRes = await pool.query(
     `SELECT * FROM vehicles WHERE id = $1 AND availability_status = 'available'`,
     [vehicle_id]
@@ -37,7 +37,7 @@ const createBooking = async (
 
   const total_price = number_of_days * vehicle.daily_rent_price;
 
-  // Insert booking
+  
   const bookingRes = await pool.query(
     `INSERT INTO bookings 
     (customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status)
@@ -46,7 +46,7 @@ const createBooking = async (
     [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price]
   );
 
-  // Mark vehicle as booked
+  
   await pool.query(
     `UPDATE vehicles SET availability_status='booked' WHERE id=$1`,
     [vehicle_id]
@@ -102,6 +102,7 @@ const getAllBookings = async (user: JwtPayload) => {
       data,
     };
   }
+
   /**
    * {
    * "success":true,
@@ -127,6 +128,7 @@ const getAllBookings = async (user: JwtPayload) => {
    *  ]
    * }
    */
+  
   // Customer bookings
   const result = await pool.query(
     `
@@ -173,7 +175,7 @@ const updateBooking = async (
 ) => {
   const { status } = payload;
 
-  // Get booking
+  
   const bookingRes = await pool.query(`SELECT * FROM bookings WHERE id = $1`, [
     bookingId,
   ]);
@@ -182,19 +184,19 @@ const updateBooking = async (
 
   const booking = bookingRes.rows[0];
 
-  // Customer cannot modify others booking
+  
   if (user.role === "customer" && user.id !== booking.customer_id.toString()) {
     throw new Error("Forbidden: You can only update your own bookings");
   }
 
-  // Customer can cancel ONLY before start date
+  
   if (user.role === "customer" && status === "cancelled") {
     if (dayjs().isAfter(dayjs(booking.rent_start_date))) {
       throw new Error("You cannot cancel a booking after the start date");
     }
   }
 
-  // Auto-mark returned
+  
   if (status === "returned") {
     await pool.query(
       `UPDATE vehicles SET availability_status='available' WHERE id=$1`,
@@ -202,7 +204,7 @@ const updateBooking = async (
     );
   }
 
-  // Update status
+  
   const result = await pool.query(
     `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
     [status, bookingId]

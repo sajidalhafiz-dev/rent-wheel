@@ -4,8 +4,6 @@ import auth from "../../middleware/auth.middleware";
 
 const router = express.Router();
 
-// routes -> controller -> service
-
 router.post("/", userControllers.createUser);
 
 router.get("/", auth("admin"), userControllers.getUser);
