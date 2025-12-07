@@ -18,7 +18,7 @@ const loginUser = async (email: string, password: string) => {
 
   //   console.log({ match, user });
   if (!match) {
-    return new Error("Invalid credentials");
+    return null;
   }
 
 
